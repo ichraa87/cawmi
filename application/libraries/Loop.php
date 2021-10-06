@@ -98,25 +98,26 @@ class Loop
                 }
                 $i = 0;
                 foreach ($products as $article) {
-                    if ($i == 0 && $carousel == true)
+                    if ($i == 0 && $carousel == true) {
                         $active = 'active';
-                    else
+                    } else {
                         $active = '';
+                    }
                     ?>
                     <div class="product-list <?= $carousel == true ? 'item' : '' ?> <?= $classes ?> <?= $active ?>">
                         <div class="inner">
                             <div class="img-container">
-                                <a href="<?= LANG_URL . '/' . $article['url'] ?>">
+                                <a href="<?= $article['vendor_url'] == null ? LANG_URL . '/' . $article['url'] : LANG_URL . '/' . $article['vendor_url'] . '/' . $article['url'] ?>">
                                     <img src="<?= base_url('/attachments/shop_images/' . $article['image']) ?>" alt="<?= str_replace('"', "'", $article['title']) ?>">
                                 </a>
                             </div>
                             <h2>
-                                <a href="<?= LANG_URL . '/' . $article['url'] ?>"><?= character_limiter($article['title'], 70) ?></a>
+                                <a href="<?= $article['vendor_url'] == null ? LANG_URL . '/' . $article['url'] : LANG_URL . '/' . $article['vendor_url'] . '/' . $article['url'] ?>"><?= character_limiter($article['title'], 70) ?></a>
                             </h2>
                             <div class="price">
                                 <span class="underline"><?= lang('price') ?>: <span><?= $article['price'] != '' ? number_format($article['price'], 2) : 0 ?><?= CURRENCY ?></span></span>
                                 <?php
-                                if ($article['old_price'] != '' && $article['old_price'] != 0) {
+                                if ($article['old_price'] != '' && $article['old_price'] != 0 && $article['price'] != '' && $article['price'] != 0) {
                                     $percent_friendly = number_format((($article['old_price'] - $article['price']) / $article['old_price']) * 100) . '%';
                                     ?>
                                     <span class="price-down"><?= $percent_friendly ?></span>
@@ -130,12 +131,18 @@ class Loop
                                     <?= lang('in_stock') ?>: <span><?= $article['quantity'] ?></span>
                                 </div>
                             <?php } if (self::$CI->load->get_var('moreInfoBtn') == 1) { ?>
-                                <a href="<?= LANG_URL . '/' . $article['url'] ?>" class="info-btn gradient-color">
+                                <a href="<?= $article['vendor_url'] == null ? LANG_URL . '/' . $article['url'] : LANG_URL . '/' . $article['vendor_url'] . '/' . $article['url'] ?>" class="info-btn gradient-color">
                                     <span class="text-to-bg"><?= lang('info_product_list') ?></span>
                                 </a>
-                            <?php } ?>
+                            <?php } 
+                            if (self::$CI->load->get_var('hideBuyButtonsOfOutOfStock') == 0 || (int)$article['quantity'] > 0) {
+                                $hasRefresh = false;
+                                if(self::$CI->load->get_var('refreshAfterAddToCart') == 1) {
+                                    $hasRefresh = true;
+                                }
+                            ?>
                             <div class="add-to-cart">
-                                <a href="javascript:void(0);" class="add-to-cart btn-add" data-goto="<?= LANG_URL . '/shopping-cart' ?>" data-id="<?= $article['id'] ?>">
+                                <a href="javascript:void(0);" class="add-to-cart btn-add <?= $hasRefresh === true ? 'refresh-me' : '' ?>" data-goto="<?= LANG_URL . '/shopping-cart' ?>" data-id="<?= $article['id'] ?>">
                                     <img class="loader" src="<?= base_url('assets/imgs/ajax-loader.gif') ?>" alt="Loding">
                                     <span class="text-to-bg"><?= lang('add_to_cart') ?></span>
                                 </a>
@@ -146,6 +153,11 @@ class Loop
                                     <span class="text-to-bg"><?= lang('buy_now') ?></span>
                                 </a>
                             </div>
+                            <?php } else { ?>
+                            <div>
+                                Product is out of stock
+                            </div>
+                            <?php } ?>
                         </div>
                     </div>
                     <?php

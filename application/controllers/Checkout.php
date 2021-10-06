@@ -10,7 +10,6 @@ class Checkout extends MY_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->load->helper(array('currency_convertor'));
         $this->load->model('admin/Orders_model');
     }
 
@@ -30,10 +29,16 @@ class Checkout extends MY_Controller
             } else {
                 $_POST['referrer'] = $this->session->userdata('referrer');
                 $_POST['clean_referrer'] = cleanReferral($_POST['referrer']);
+                $_POST['user_id'] = isset($_SESSION['logged_user']) ? $_SESSION['logged_user'] : 0;
                 $orderId = $this->Public_model->setOrder($_POST);
                 if ($orderId != false) {
+                    /*
+                     * Save product orders in vendors profiles
+                     */
+                    $this->setVendorOrders();
                     $this->orderId = $orderId;
                     $this->setActivationLink();
+                    $this->sendNotifications();
                     $this->goToDestination();
                 } else {
                     log_message('error', 'Cant save order!! ' . implode('::', $_POST));
@@ -45,8 +50,30 @@ class Checkout extends MY_Controller
         $data['bank_account'] = $this->Orders_model->getBankAccountSettings();
         $data['cashondelivery_visibility'] = $this->Home_admin_model->getValueStore('cashondelivery_visibility');
         $data['paypal_email'] = $this->Home_admin_model->getValueStore('paypal_email');
+        $data['shippingAmount'] = $this->Home_admin_model->getValueStore('shippingAmount');
         $data['bestSellers'] = $this->Public_model->getbestSellers();
         $this->render('checkout', $head, $data);
+    }
+
+    private function setVendorOrders()
+    {
+        $this->Public_model->setVendorOrder($_POST);
+    }
+
+    /*
+     * Send notifications to users that have nofify=1 in /admin/adminusers
+     */
+
+    private function sendNotifications()
+    {
+        $users = $this->Public_model->getNotifyUsers();
+        $myDomain = $this->config->item('base_url');
+        if (!empty($users)) {
+            $this->sendmail->clearAddresses();
+            foreach ($users as $user) {
+                $this->sendmail->sendTo($user, 'Admin', 'New order in ' . $myDomain, 'Hello, you have new order. Can check it in /admin/orders');
+            }
+        }
     }
 
     private function setActivationLink()
@@ -133,7 +160,6 @@ class Checkout extends MY_Controller
         $head['keywords'] = str_replace(" ", ",", $head['title']);
         $data['paypal_sandbox'] = $this->Home_admin_model->getValueStore('paypal_sandbox');
         $data['paypal_email'] = $this->Home_admin_model->getValueStore('paypal_email');
-        $data['paypal_currency'] = $this->Home_admin_model->getValueStore('paypal_currency');
         $this->render('checkout_parts/paypal_payment', $head, $data);
     }
 

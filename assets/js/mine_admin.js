@@ -348,10 +348,10 @@ $('#modalConvertor').on('hidden.bs.modal', function (e) {
     $("#new_currency").empty();
 });
 
-$(document).ready(function () {
-    $("#showSliderDescrption").click(function () {
-        $("#theSliderDescrption").slideToggle("slow", function () {});
-    });
+
+$(".showSliderDescrption").click(function () {
+    var desc_id = $(this).data('descr');
+    $("#theSliderDescrption-" + desc_id).slideToggle("slow", function () {});
 });
 
 // Products
@@ -437,14 +437,22 @@ $('.savePositionCategorie').click(function () {
     });
 });
 
+$('.locale-change').click(function () {
+    var toLocale = $(this).data('locale-change');
+    $('.locale-container').hide();
+    $('.locale-container-' + toLocale).show();
+    $('.locale-change').removeClass('active');
+    $(this).addClass('active');
+});
+
 function reloadOthersImagesContainer() {
     $('.others-images-container').empty();
     $('.others-images-container').load(urls.loadOthersImages, {"folder": $('[name="folder"]').val()});
 }
 
 // Orders
-function changeOrdersOrderStatus(id, to_status) {
-    $.post(urls.changeOrdersOrderStatus, {the_id: id, to_status: to_status}, function (data) {
+function changeOrdersOrderStatus(id, to_status, products, userEmail) {
+    $.post(urls.changeOrdersOrderStatus, {the_id: id, to_status: to_status, products: products, userEmail: userEmail}, function (data) {
         if (data == '1') {
             if (to_status == 0) {
                 $('[data-action-id="' + id + '"] div.status b').text('No processed');
@@ -459,6 +467,8 @@ function changeOrdersOrderStatus(id, to_status) {
                 $('[data-action-id="' + id + '"]').removeClass().addClass('bg-warning  text-center');
             }
             $('#new-order-alert-' + id).remove();
+        } else {
+            alert('Error with status change. Please check logs!');
         }
     });
 }
@@ -485,21 +495,6 @@ function changeProductStatus(id) {
         } else {
             alert('Error change status!');
         }
-    });
-}
-
-function currency_ajax_convert() {
-    var from = $('#select_from_cur').val();
-    var to = $('#select_to_cur').val();
-    var sum = $('#sum').val();
-    $(".loading-conv").show();
-    $.ajax({
-        type: "POST",
-        url: urls.convertCurrency,
-        data: {sum: sum, from: from, to: to}
-    }).done(function (data) {
-        $(".loading-conv").hide();
-        $("#new_currency").empty().append(data);
     });
 }
 

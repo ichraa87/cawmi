@@ -42,7 +42,7 @@ class Products_model extends CI_Model
         return $this->db->count_all_results('products');
     }
 
-    public function getProducts($limit, $page, $search_title = null, $orderby = null, $category = null)
+    public function getProducts($limit, $page, $search_title = null, $orderby = null, $category = null, $vendor = null)
     {
         if ($search_title != null) {
             $search_title = trim($this->db->escape_like_str($search_title));
@@ -59,9 +59,13 @@ class Products_model extends CI_Model
         if ($category != null) {
             $this->db->where('shop_categorie', $category);
         }
+        if ($vendor != null) {
+            $this->db->where('vendor_id', $vendor);
+        }
+        $this->db->join('vendors', 'vendors.id = products.vendor_id', 'left');
         $this->db->join('products_translations', 'products_translations.for_id = products.id', 'left');
         $this->db->where('products_translations.abbr', MY_DEFAULT_LANGUAGE_ABBR);
-        $query = $this->db->select('products.*, products_translations.title, products_translations.description, products_translations.price, products_translations.old_price, products_translations.abbr, products.url, products_translations.for_id, products_translations.basic_description')->get('products', $limit, $page);
+        $query = $this->db->select('vendors.name as vendor_name, vendors.id as vendor_id, products.*, products_translations.title, products_translations.description, products_translations.price, products_translations.old_price, products_translations.abbr, products.url, products_translations.for_id, products_translations.basic_description')->get('products', $limit, $page);
         return $query->result();
     }
 
@@ -72,7 +76,11 @@ class Products_model extends CI_Model
 
     public function getOneProduct($id)
     {
-        $this->db->where('id', $id);
+        $this->db->select('vendors.name as vendor_name, vendors.id as vendor_id, products.*, products_translations.price');
+        $this->db->where('products.id', $id);
+        $this->db->join('vendors', 'vendors.id = products.vendor_id', 'left');
+        $this->db->join('products_translations', 'products_translations.for_id = products.id', 'inner');
+        $this->db->where('products_translations.abbr', MY_DEFAULT_LANGUAGE_ABBR);
         $query = $this->db->get('products');
         if ($query->num_rows() > 0) {
             return $query->row_array();
@@ -90,6 +98,12 @@ class Products_model extends CI_Model
 
     public function setProduct($post, $id = 0)
     {
+        if (!isset($post['brand_id'])) {
+            $post['brand_id'] = null;
+        }
+        if (!isset($post['virtual_products'])) {
+            $post['virtual_products'] = null;
+        }
         $this->db->trans_begin();
         $is_update = false;
         if ($id > 0) {
@@ -100,6 +114,8 @@ class Products_model extends CI_Model
                         'quantity' => $post['quantity'],
                         'in_slider' => $post['in_slider'],
                         'position' => $post['position'],
+                        'virtual_products' => $post['virtual_products'],
+                        'brand_id' => $post['brand_id'],
                         'time_update' => time()
                     ))) {
                 log_message('error', print_r($this->db->error(), true));
@@ -124,6 +140,9 @@ class Products_model extends CI_Model
                         'quantity' => $post['quantity'],
                         'in_slider' => $post['in_slider'],
                         'position' => $post['position'],
+                        'virtual_products' => $post['virtual_products'],
+                        'folder' => $post['folder'],
+                        'brand_id' => $post['brand_id'],
                         'time' => time()
                     ))) {
                 log_message('error', print_r($this->db->error(), true));
@@ -149,7 +168,7 @@ class Products_model extends CI_Model
     private function setProductTranslation($post, $id, $is_update)
     {
         $i = 0;
-        $current_trans = $this->getTranslations($id, 'product');
+        $current_trans = $this->getTranslations($id);
         foreach ($post['translations'] as $abbr) {
             $arr = array();
             $emergency_insert = false;
@@ -158,7 +177,11 @@ class Products_model extends CI_Model
             }
             $post['title'][$i] = str_replace('"', "'", $post['title'][$i]);
             $post['price'][$i] = str_replace(' ', '', $post['price'][$i]);
-            $post['price'][$i] = str_replace(',', '', $post['price'][$i]);
+            $post['price'][$i] = str_replace(',', '.', $post['price'][$i]);
+            $post['price'][$i] = preg_replace("/[^0-9,.]/", "", $post['price'][$i]);
+            $post['old_price'][$i] = str_replace(' ', '', $post['old_price'][$i]);
+            $post['old_price'][$i] = str_replace(',', '.', $post['old_price'][$i]);
+            $post['old_price'][$i] = preg_replace("/[^0-9,.]/", "", $post['old_price'][$i]);
             $arr = array(
                 'title' => $post['title'][$i],
                 'basic_description' => $post['basic_description'][$i],

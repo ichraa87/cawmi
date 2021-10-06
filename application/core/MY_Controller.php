@@ -9,7 +9,7 @@ class MY_Controller extends MX_Controller
 
     public function __construct()
     {
-        parent::__construct(); 
+        parent::__construct();
         $this->getActivePages();
         $this->checkForPostRequests();
         $this->setReferrer();
@@ -28,6 +28,24 @@ class MY_Controller extends MX_Controller
         $head['sumOfItems'] = $this->shoppingcart->sumValues;
         $vars = $this->loadVars();
         $this->load->vars($vars);
+        $all_categories = $this->Public_model->getShopCategories();
+
+        function buildTree1(array $elements, $parentId = 0)
+        {
+            $branch = array();
+            foreach ($elements as $element) {
+                if ($element['sub_for'] == $parentId) {
+                    $children = buildTree1($elements, $element['id']);
+                    if ($children) {
+                        $element['children'] = $children;
+                    }
+                    $branch[] = $element;
+                }
+            }
+            return $branch;
+        }
+
+        $head['nav_categories'] = $tree = buildTree1($all_categories);
         $this->load->view($this->template . '_parts/header', $head);
         $this->load->view($this->template . $view, $data);
         $this->load->view($this->template . '_parts/footer', $footer);
@@ -44,26 +62,20 @@ class MY_Controller extends MX_Controller
         $vars['nonDynPages'] = $this->nonDynPages;
         $vars['dynPages'] = $this->dynPages;
         $vars['footerCategories'] = $this->Public_model->getFooterCategories();
-        $vars['sitelogo'] = $this->Home_admin_model->getValueStore('sitelogo');
-        $vars['naviText'] = htmlentities($this->Home_admin_model->getValueStore('navitext'));
-        $vars['footerCopyright'] = htmlentities($this->Home_admin_model->getValueStore('footercopyright'));
-        $vars['contactsPage'] = $this->Home_admin_model->getValueStore('contactspage');
-        $vars['footerContactAddr'] = htmlentities($this->Home_admin_model->getValueStore('footerContactAddr'));
-        $vars['footerContactPhone'] = htmlentities($this->Home_admin_model->getValueStore('footerContactPhone'));
-        $vars['footerContactEmail'] = htmlentities($this->Home_admin_model->getValueStore('footerContactEmail'));
-        $vars['footerAboutUs'] = $this->Home_admin_model->getValueStore('footerAboutUs');
-        $vars['footerSocialFacebook'] = $this->Home_admin_model->getValueStore('footerSocialFacebook');
-        $vars['footerSocialTwitter'] = $this->Home_admin_model->getValueStore('footerSocialTwitter');
-        $vars['footerSocialGooglePlus'] = $this->Home_admin_model->getValueStore('footerSocialGooglePlus');
-        $vars['footerSocialPinterest'] = $this->Home_admin_model->getValueStore('footerSocialPinterest');
-        $vars['footerSocialYoutube'] = $this->Home_admin_model->getValueStore('footerSocialYoutube');
-        $vars['addedJs'] = $this->Home_admin_model->getValueStore('addJs');
-        $vars['publicQuantity'] = $this->Home_admin_model->getValueStore('publicQuantity');
-        $vars['moreInfoBtn'] = $this->Home_admin_model->getValueStore('moreInfoBtn');
+
+        $this->load->model('admin/Settings_model');
+        $values = $this->Settings_model->getValueStores();
+        if(is_array($values) && count($values) > 0) {
+            foreach($values as $value) {
+                if (!array_key_exists($value['thekey'], $vars)) {
+                    $vars[$value['thekey']] = htmlentities($value['value']);
+                }
+            }
+        }
+        
         $vars['allLanguages'] = $this->getAllLangs();
         $vars['load'] = $this->loop;
         $vars['cookieLaw'] = $this->Public_model->getCookieLaw();
-        $vars['codeDiscounts'] = $this->Home_admin_model->getValueStore('codeDiscounts');
         return $vars;
     }
 
@@ -76,7 +88,7 @@ class MY_Controller extends MX_Controller
         $arr = array();
         $this->load->model('admin/Languages_model');
         $langs = $this->Languages_model->getLanguages();
-        foreach ($langs->result() as $lang) {
+        foreach ($langs as $lang) {
             $arr[$lang->abbr]['name'] = $lang->name;
             $arr[$lang->abbr]['flag'] = $lang->flag;
         }
@@ -118,7 +130,7 @@ class MY_Controller extends MX_Controller
             $arr['email'] = $_POST['subscribeEmail'];
             if (filter_var($arr['email'], FILTER_VALIDATE_EMAIL) && !$this->session->userdata('email_added')) {
                 $this->session->set_userdata('email_added', 1);
-                $res = $this->Public_model->setSubscribe($arr);
+                $this->Public_model->setSubscribe($arr);
                 $this->session->set_flashdata('emailAdded', lang('email_added'));
             }
             if (!headers_sent()) {

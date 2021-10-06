@@ -20,18 +20,6 @@ class ADMIN_Controller extends MX_Controller
     {
         parent::__construct();
         $this->load->library(array('form_validation'));
-        $this->load->helper(
-                array(
-                    'file',
-                    'pagination',
-                    'except_letters',
-                    'currencies',
-                    'rcopy',
-                    'rrmdir',
-                    'rreadDir',
-                    'savefile'
-                )
-        );
         $this->history = $this->config->item('admin_history');
         $this->activePages = $vars['activePages'] = $this->getActivePages();
         $numNotPreviewOrders = $this->Home_admin_model->newOrdersCheck();
@@ -41,6 +29,7 @@ class ADMIN_Controller extends MX_Controller
         $vars['numNotPreviewOrders'] = $numNotPreviewOrders;
         $vars['warnings'] = $this->warningChecker();
         $vars['showBrands'] = $this->Home_admin_model->getValueStore('showBrands');
+        $vars['virtualProducts'] = $this->Home_admin_model->getValueStore('virtualProducts');
         $this->load->vars($vars);
     }
 
@@ -72,12 +61,12 @@ class ADMIN_Controller extends MX_Controller
         $errors = array();
 
         // Check application/language folder is writable
-        if (!is_writable('.' . DIRECTORY_SEPARATOR . 'application' . DIRECTORY_SEPARATOR . 'language')) {
+        if (!is_writable(APPPATH . 'language')) {
             $errors[] = 'Language folder is not writable!';
         }
 
         // Check application/logs folder is writable
-        if (!is_writable('.' . DIRECTORY_SEPARATOR . 'application' . DIRECTORY_SEPARATOR . 'logs')) {
+        if (!is_writable(APPPATH . 'logs')) {
             $errors[] = 'Logs folder is not writable!';
         }
 

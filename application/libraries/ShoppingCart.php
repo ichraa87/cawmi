@@ -24,8 +24,9 @@ class ShoppingCart
     public function manageShoppingCart()
     {
         if ($_POST['action'] == 'add') {
-            if (!isset($_SESSION['shopping_cart']))
+            if (!isset($_SESSION['shopping_cart'])) {
                 $_SESSION['shopping_cart'] = array();
+            }
             @$_SESSION['shopping_cart'][] = (int) $_POST['article_id'];
         }
         if ($_POST['action'] == 'remove') {
@@ -60,7 +61,7 @@ class ShoppingCart
     {
         if ((!isset($_SESSION['shopping_cart']) || empty($_SESSION['shopping_cart'])) && get_cookie('shopping_cart') != NULL) {
             $_SESSION['shopping_cart'] = unserialize(get_cookie('shopping_cart'));
-        } elseif (!isset($_SESSION['shopping_cart']) || empty($_SESSION['shopping_cart'])) {
+        } elseif (!isset($_SESSION['shopping_cart']) || !is_array($_SESSION['shopping_cart'])) {
             return 0;
         }
         $result['array'] = $this->CI->Public_model->getShopItems(array_unique($_SESSION['shopping_cart']));

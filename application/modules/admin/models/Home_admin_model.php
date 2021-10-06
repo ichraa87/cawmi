@@ -73,7 +73,7 @@ class Home_admin_model extends CI_Model
 
     public function getOrdersByMonth()
     {
-        $result = $this->db->query("SELECT YEAR(FROM_UNIXTIME(date)) as year, MONTH(FROM_UNIXTIME(date)) as month, COUNT(id) as num FROM orders GROUP BY YEAR(FROM_UNIXTIME(date)), MONTH(FROM_UNIXTIME(date)) ASC");
+        $result = $this->db->query("SELECT YEAR(FROM_UNIXTIME(date)) as year, MONTH(FROM_UNIXTIME(date)) as month, COUNT(id) as num FROM orders GROUP BY YEAR(FROM_UNIXTIME(date)), MONTH(FROM_UNIXTIME(date))");
         $result = $result->result_array();
         $orders = array();
         $years = array();
@@ -125,9 +125,12 @@ class Home_admin_model extends CI_Model
 
     public function getValueStore($key)
     {
-        $query = $this->db->query("SELECT value FROM value_store WHERE thekey = '$key'");
-        $img = $query->row_array();
-        return $img['value'];
+        $query = $this->db->query("SELECT value FROM value_store WHERE thekey = ? LIMIT 1", [$key]);
+        $value = $query->row_array();
+        if(!$value) {
+            return null;
+        }
+        return $value['value'];
     }
 
     public function newOrdersCheck()

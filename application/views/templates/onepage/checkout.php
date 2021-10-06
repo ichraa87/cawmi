@@ -5,13 +5,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <div id="checkout-page">
     <div class="container">
         <div class="body">
-            <?php if ($cartItems['array'] != null) { ?>
+            <?php if (isset($cartItems['array']) && $cartItems['array'] != null) { ?>
                 <?= purchase_steps(1, 2) ?>
                 <div class="row">
                     <div class="col-sm-4">
-                        asdas
-                        dasdasd
-                        as
+                        <?php
+                        if ($shippingOrder != 0 && $shippingOrder != null) { ?>
+                            <div style="padding: 20px 0;">
+                                <div style="color:red">
+                                    <strong><?= lang('promo') ?></strong> - <?= str_replace(array('%price%', '%currency%'), array($shippingOrder, CURRENCY), lang('freeShipping')) ?>!
+                                </div>
+                            </div>
+                        <?php } ?>
                     </div>
                     <div class="col-sm-8"> 
                         <form method="POST" id="goOrder">
@@ -111,13 +116,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                                 </td>
                                                 <td><a href="<?= LANG_URL . '/' . $item['url'] ?>"><?= $item['title'] ?></a></td>
                                                 <td>
-                                                    <a class="btn btn-xs btn-primary refresh-me add-to-cart" data-id="<?= $item['id'] ?>" href="javascript:void(0);">
+                                                    <a class="btn btn-xs btn-primary refresh-me add-to-cart <?= $item['quantity'] <= $item['num_added'] ? 'disabled' : '' ?>" data-id="<?= $item['id'] ?>" href="javascript:void(0);">
                                                         <span class="glyphicon glyphicon-plus"></span>
                                                     </a>
                                                     <span class="quantity-num">
                                                         <?= $item['num_added'] ?>
                                                     </span>
-                                                    <a class="btn  btn-xs btn-danger" onclick="removeProduct(<?= $item['id'] ?>, true)" href="javascript:void(0);">
+                                                    <a class="btn btn-xs btn-danger" onclick="removeProduct(<?= $item['id'] ?>, true)" href="javascript:void(0);">
                                                         <span class="glyphicon glyphicon-minus"></span>
                                                     </a>
                                                 </td>
@@ -134,6 +139,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                                 <input type="hidden" name="discountAmount" value="">
                                             </td>
                                         </tr>
+
+                                        <?php
+                                        $total_parsed = str_replace(' ', '', str_replace(',', '', $cartItems['finalSum']));
+                                        if((int)$shippingAmount > 0 && ((int)$shippingOrder > $total_parsed)) {
+                                        ?>
+                                        <tr>
+                                            <td colspan="4" class="text-right"><?= lang('shipping') ?></td>
+                                            <td>
+                                                <span class="final-amount"><?= (int)$shippingAmount ?></span><?= CURRENCY ?>
+                                            </td>
+                                        </tr>
+                                        <?php } ?>
+
                                     </tbody>
                                 </table>
                             </div>

@@ -1,4 +1,24 @@
 <?php
+
+if (isset($_SERVER['SERVER_PORT']))
+{
+	/*
+	|--------------------------------------------------------------------------
+	| Base URL
+	|--------------------------------------------------------------------------
+	*/
+	define('BASE_URL',
+		(!empty($_SERVER['SERVER_PORT'])?$_SERVER['SERVER_PORT']==443?'https':'http':FALSE).
+		"://".(!empty($_SERVER['SERVER_NAME'])?$_SERVER['SERVER_NAME']:FALSE).str_replace(basename($_SERVER['SCRIPT_NAME']),"",$_SERVER['SCRIPT_NAME']));
+
+	/*
+	|--------------------------------------------------------------------------
+	| Current URL
+	|--------------------------------------------------------------------------
+	*/
+	define('CURRENT_URL', (!empty($_SERVER['SERVER_PORT'])?$_SERVER['SERVER_PORT']==443?'https':'http':FALSE)."://".(!empty($_SERVER['SERVER_NAME'])?$_SERVER['SERVER_NAME']:FALSE).str_replace('//', '/', $_SERVER['REQUEST_URI']));
+}
+
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /*
@@ -87,5 +107,5 @@ defined('EXIT__AUTO_MAX')      OR define('EXIT__AUTO_MAX', 125); // highest auto
 /*
  | Template used constants
  */
-defined('TEMPLATES_DIR')       OR define('TEMPLATES_DIR', './application/views/templates/'); // directory of templates
-defined('VIEWS_DIR')           OR define('VIEWS_DIR', './application/views/'); // directory of views
+defined('TEMPLATES_DIR')       OR define('TEMPLATES_DIR', APPPATH.'views/templates/'); // directory of templates
+defined('VIEWS_DIR')           OR define('VIEWS_DIR', APPPATH.'views/'); // directory of views

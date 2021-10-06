@@ -29,7 +29,7 @@ class Publish extends ADMIN_Controller
         $trans_load = null;
         if ($id > 0 && $_POST == null) {
             $_POST = $this->Products_model->getOneProduct($id);
-            $trans_load = $this->Products_model->getTranslations($id, 'product');
+            $trans_load = $this->Products_model->getTranslations($id);
         }
         if (isset($_POST['submit'])) {
             if (isset($_GET['to_lang'])) {
@@ -37,7 +37,7 @@ class Publish extends ADMIN_Controller
             }
             $_POST['image'] = $this->uploadImage();
             $this->Products_model->setProduct($_POST, $id);
-            $this->session->set_flashdata('result_publish', 'product is published!');
+            $this->session->set_flashdata('result_publish', 'Product is published!');
             if ($id == 0) {
                 $this->saveHistory('Success published product');
             } else {
@@ -128,7 +128,7 @@ class Publish extends ADMIN_Controller
                         if (is_file($dir . $file)) {
                             $output .= '
                                 <div class="other-img" id="image-container-' . $i . '">
-                                    <img src="' . base_url($dir . $file) . '" style="width:100px; height: 100px;">
+                                    <img src="' . base_url('attachments/shop_images/' . $_POST['folder'] . '/' . $file) . '" style="width:100px; height: 100px;">
                                     <a href="javascript:void(0);" onclick="removeSecondaryProductImage(\'' . $file . '\', \'' . $_POST['folder'] . '\', ' . $i . ')">
                                         <span class="glyphicon glyphicon-remove"></span>
                                     </a>
@@ -157,23 +157,6 @@ class Publish extends ADMIN_Controller
         if ($this->input->is_ajax_request()) {
             $img = '.' . DIRECTORY_SEPARATOR . 'attachments' . DIRECTORY_SEPARATOR . 'shop_images' . DIRECTORY_SEPARATOR . '' . $_POST['folder'] . DIRECTORY_SEPARATOR . $_POST['image'];
             unlink($img);
-        }
-    }
-
-    /*
-     * called from ajax
-     */
-
-    public function convertCurrency()
-    {
-        $this->load->helper('currency_convertor');
-        if ($this->input->is_ajax_request()) {
-            $amount = $_POST['sum'];
-            if ($amount == null) {
-                echo 'Please type a price';
-                exit;
-            }
-            echo convertCurrency($amount, $_POST['from'], $_POST['to']);
         }
     }
 

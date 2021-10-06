@@ -10,7 +10,7 @@
                 <?php if ($this->session->flashdata('resultSiteLogoPublish')) { ?>
                     <div class="alert alert-info"><?= $this->session->flashdata('resultSiteLogoPublish') ?></div>
                 <?php } ?>
-                <img src="<?= base_url('attachments/site_logo/' . $siteLogo) ?>" alt="Logo is deleted. Upload new!" class="img-responsive">
+                <img src="<?= base_url('attachments/site_logo/' . $sitelogo) ?>" alt="Logo is deleted. Upload new!" class="img-responsive">
                 <hr>
                 <form accept-charset="utf-8" method="post" enctype="multipart/form-data" action="">
                     <input type="file" name="sitelogo" size="20" />
@@ -28,7 +28,7 @@
                 <?php } ?>
                 <form method="POST" action="">
                     <div class="input-group">
-                        <input class="form-control" name="naviText" value="<?= $naviText ?>" type="text">
+                        <input class="form-control" name="naviText" value="<?= $navitext ?>" type="text">
                         <span class="input-group-btn">
                             <button class="btn btn-default" value="" type="submit">
                                 <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
@@ -48,7 +48,7 @@
                 <?php } ?>
                 <form method="POST" action="">
                     <div class="input-group">
-                        <input class="form-control" name="footerCopyright" value="<?= $footerCopyright ?>" type="text">
+                        <input class="form-control" name="footerCopyright" value="<?= $footercopyright ?>" type="text">
                         <span class="input-group-btn">
                             <button class="btn btn-default" value="" placeholder="Find product.." type="submit">
                                 <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
@@ -68,7 +68,7 @@
                 <?php } ?>
                 <form method="POST" action="">
                     <div class="form-group">
-                        <textarea name="contactsPage" id="contacts-page"><?= $contactsPage ?></textarea></div>
+                        <textarea name="contactsPage" id="contacts-page"><?= $contactspage ?></textarea></div>
                     <div class="form-group">
                         <button class="btn btn-default" value="" placeholder="Find product.." type="submit">
                             Update <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
@@ -79,6 +79,7 @@
         </div>
         <script>
             CKEDITOR.replace('contacts-page');
+            CKEDITOR.config.entities = false;
         </script>
     </div>
     <div class="col-sm-6 col-md-4">
@@ -202,7 +203,7 @@
     </div>
     <div class="col-sm-6 col-md-4">
         <div class="panel panel-success col-h">
-            <div class="panel-heading">Free Shipping for order equal or more than:</div>
+            <div class="panel-heading">Free Shipping for order equal or more than (Final purchase amount):</div>
             <div class="panel-body">
                 <?php if ($this->session->flashdata('shippingOrder')) { ?>
                     <div class="alert alert-info"><?= $this->session->flashdata('shippingOrder') ?></div>
@@ -210,6 +211,26 @@
                 <form method="POST" action="">
                     <div class="input-group">
                         <input class="form-control" name="shippingOrder" value="<?= $shippingOrder ?>" type="text">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" value="" type="submit">
+                                <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                            </button>
+                        </span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-4">
+        <div class="panel panel-success col-h">
+            <div class="panel-heading">Shipping amount (leave 0 or empty for no shipping price):</div>
+            <div class="panel-body">
+                <?php if ($this->session->flashdata('shippingAmount')) { ?>
+                    <div class="alert alert-info"><?= $this->session->flashdata('shippingAmount') ?></div>
+                <?php } ?>
+                <form method="POST" action="">
+                    <div class="input-group">
+                        <input class="form-control" name="shippingAmount" value="<?= isset($shippingAmount) ? $shippingAmount: '' ?>" type="text">
                         <span class="input-group-btn">
                             <button class="btn btn-default" value="" type="submit">
                                 <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
@@ -272,6 +293,23 @@
     </div>
     <div class="col-sm-6 col-md-4">
         <div class="panel panel-success col-h">
+            <div class="panel-heading">Multi-Vendor Support</div>
+            <div class="panel-body">
+                <?php if ($this->session->flashdata('multiVendor')) { ?>
+                    <div class="alert alert-info"><?= $this->session->flashdata('multiVendor') ?></div>
+                <?php } ?>
+                <form method="POST" action="">
+                    <input type="hidden" name="multiVendor" value="<?= $multiVendor ?>">
+                    <input <?= $multiVendor == 1 ? 'checked' : '' ?> data-toggle="toggle" data-for-field="multiVendor" class="toggle-changer" type="checkbox">
+                    <button class="btn btn-default" value="" type="submit">
+                        Save
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-4">
+        <div class="panel panel-success col-h">
             <div class="panel-heading">Show in list out of stock products</div>
             <div class="panel-body">
                 <?php if ($this->session->flashdata('outOfStock')) { ?>
@@ -280,6 +318,40 @@
                 <form method="POST" action="">
                     <input type="hidden" name="outOfStock" value="<?= $outOfStock ?>">
                     <input <?= $outOfStock == 1 ? 'checked' : '' ?> data-toggle="toggle" data-for-field="outOfStock" class="toggle-changer" type="checkbox">
+                    <button class="btn btn-default" value="" type="submit">
+                        Save
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-4">
+        <div class="panel panel-success col-h">
+            <div class="panel-heading">Hide buy button if product is shown but is out of stock</div>
+            <div class="panel-body">
+                <?php if ($this->session->flashdata('hideBuyButtonsOfOutOfStock')) { ?>
+                    <div class="alert alert-info"><?= $this->session->flashdata('hideBuyButtonsOfOutOfStock') ?></div>
+                <?php } ?>
+                <form method="POST" action="">
+                    <input type="hidden" name="hideBuyButtonsOfOutOfStock" value="<?= $hideBuyButtonsOfOutOfStock ?>">
+                    <input <?= $hideBuyButtonsOfOutOfStock == 1 ? 'checked' : '' ?> data-toggle="toggle" data-for-field="hideBuyButtonsOfOutOfStock" class="toggle-changer" type="checkbox">
+                    <button class="btn btn-default" value="" type="submit">
+                        Save
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-4">
+        <div class="panel panel-success col-h">
+            <div class="panel-heading">Do not open shopping cart after add product to it</div>
+            <div class="panel-body">
+                <?php if ($this->session->flashdata('refreshAfterAddToCart')) { ?>
+                    <div class="alert alert-info"><?= $this->session->flashdata('refreshAfterAddToCart') ?></div>
+                <?php } ?>
+                <form method="POST" action="">
+                    <input type="hidden" name="refreshAfterAddToCart" value="<?= $refreshAfterAddToCart ?>">
+                    <input <?= $refreshAfterAddToCart == 1 ? 'checked' : '' ?> data-toggle="toggle" data-for-field="refreshAfterAddToCart" class="toggle-changer" type="checkbox">
                     <button class="btn btn-default" value="" type="submit">
                         Save
                     </button>
@@ -350,20 +422,20 @@
                     <label>Enable:</label>
                     <input <?= isset($cookieLawInfo['cookieInfo']['visibility']) && $cookieLawInfo['cookieInfo']['visibility'] == 1 ? 'checked' : '' ?> data-toggle="toggle" data-for-field="visibility" class="toggle-changer" type="checkbox">
                     <hr>
-                    <?php foreach ($languages->result() as $language) { ?>
+                    <?php foreach ($languages as $language) { ?>
                         <input type="hidden" name="translations[]" value="<?= $language->abbr ?>">
-                    <?php } foreach ($languages->result() as $language) { ?>
+                    <?php } foreach ($languages as $language) { ?>
                         <div class="form-group">
                             <label for="message-cookie-law">Message (<?= $language->name ?><img src="<?= base_url('attachments/lang_flags/' . $language->flag) ?>" alt="">)</label>
                             <input type="text" name="message[]" value="<?= isset($cookieLawInfo['cookieTranslate'][$language->abbr]['message']) ? $cookieLawInfo['cookieTranslate'][$language->abbr]['message'] : '' ?>" class="form-control" id="message-cookie-law">
                         </div>
-                    <?php } foreach ($languages->result() as $language) {
+                    <?php } foreach ($languages as $language) {
                         ?>
                         <div class="form-group">
                             <label for="btn-cookie-law">Button Text (<?= $language->name ?><img src="<?= base_url('attachments/lang_flags/' . $language->flag) ?>" alt="">)</label>
                             <input type="text" name="button_text[]" value="<?= isset($cookieLawInfo['cookieTranslate'][$language->abbr]['button_text']) ? $cookieLawInfo['cookieTranslate'][$language->abbr]['button_text'] : '' ?>" class="form-control" id="btn-cookie-law">
                         </div>
-                    <?php } foreach ($languages->result() as $language) { ?>
+                    <?php } foreach ($languages as $language) { ?>
                         <div class="form-group">
                             <label for="learn_more">Learn More (<?= $language->name ?><img src="<?= base_url('attachments/lang_flags/' . $language->flag) ?>" alt="">):</label>
                             <input type="text" name="learn_more[]" value="<?= isset($cookieLawInfo['cookieTranslate'][$language->abbr]['learn_more']) ? $cookieLawInfo['cookieTranslate'][$language->abbr]['learn_more'] : '' ?>" class="form-control" id="learn_more">
@@ -391,6 +463,23 @@
                         </div>
                     </div>
                     <button class="btn btn-default" name="setCookieLaw" value="" type="submit">
+                        Save
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-4">
+        <div class="panel panel-success col-h">
+            <div class="panel-heading">Virtual products</div>
+            <div class="panel-body">
+                <?php if ($this->session->flashdata('virtualProducts')) { ?>
+                    <div class="alert alert-info"><?= $this->session->flashdata('virtualProducts') ?></div>
+                <?php } ?>
+                <form method="POST" action="">
+                    <input type="hidden" name="virtualProducts" value="<?= $virtualProducts ?>">
+                    <input <?= $virtualProducts == 1 ? 'checked' : '' ?> data-toggle="toggle" data-for-field="virtualProducts" class="toggle-changer" type="checkbox">
+                    <button class="btn btn-default" value="" type="submit">
                         Save
                     </button>
                 </form>
